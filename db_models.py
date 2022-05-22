@@ -43,6 +43,8 @@ class Product(IdTitleMixin, UserCreatedUpdatedMixin, Base):
     product_category = relationship(
         "ProductCategory", back_populates="products")
 
+    columns = relationship("MachineColumn", back_populates="product")
+
 
 class Machine(Base):
     __tablename__ = "machine"
@@ -55,6 +57,7 @@ class Machine(Base):
         Integer, ForeignKey("user.id"), nullable=False)
 
     columns = relationship("MachineColumn", back_populates="machine")
+    owner = relationship("User")
 
 
 class MachineColumn(Base):
@@ -74,3 +77,4 @@ class MachineColumn(Base):
     machine_id = Column(Integer, ForeignKey("machine.id"), nullable=False)
 
     machine = relationship("Machine", back_populates="columns")
+    product = relationship("Product", back_populates="columns")

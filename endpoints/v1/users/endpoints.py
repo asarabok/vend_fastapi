@@ -8,14 +8,14 @@ from dto_models import (
     UserInfoModel
 )
 from fastapi import APIRouter, Depends, HTTPException, status
-from endpoints.v1.user.mappers import map_to_output_machine_model
+from endpoints.v1.users.mappers import map_to_output_machine_model
 from utils import hash_password
 from database import session
 
-user_router = APIRouter(prefix="/user", tags=["User"])
+user_routers = APIRouter(prefix="/users", tags=["User"])
 
 
-@user_router.post(
+@user_routers.post(
     "/login",
     response_model=AuthenticatedUserResponseModel,
     summary="User login which generates JWT token"
@@ -37,7 +37,7 @@ def user_login(user: LoginUserModel):
     return AuthenticatedUserResponseModel(token=token)
 
 
-@user_router.get(
+@user_routers.get(
     "/me",
     response_model=UserInfoModel,
     summary="Get logged user info and assigned machines"

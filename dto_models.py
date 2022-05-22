@@ -1,9 +1,14 @@
 
 from datetime import datetime
-from typing import Optional, List
+from typing import List, Optional
 
-from pydantic import BaseModel, EmailStr, constr
-
+from pydantic import (
+    BaseModel,
+    EmailStr,
+    conint,
+    constr,
+    root_validator
+)
 
 class OutputMachineModel(BaseModel):
     id: int
@@ -76,3 +81,16 @@ class OutputSingleProductModel(OutputProductListModel):
     created_by: int
     updated_by: Optional[int] = None
     updated_at: Optional[datetime] = None
+
+
+class OutputMachineColumnModel(BaseModel):
+    index: conint(ge=0, le=20)
+    current_quantity: conint(ge=0, le=20)
+    spiral_quantity: conint(ge=0, le=20)
+    price: float
+    product: OutputSingleProductModel
+
+
+class OutputMachineListModel(OutputMachineModel):
+    owner: BaseUserModel
+    columns: List[OutputMachineColumnModel] = []

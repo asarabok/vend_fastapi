@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 import jwt
 from fastapi import HTTPException, status
 
-from endpoints.v1.user.mappers import map_to_base_user_model
+from endpoints.v1.users.mappers import map_to_base_user_model
 
 
 class JwtAuthentication:

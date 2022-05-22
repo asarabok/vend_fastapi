@@ -1,6 +1,6 @@
 
 from database import session
-from db_models import Product, ProductCategory
+from db_models import Product
 from dependencies import verify_authorization_token
 from dto_models import InputProductModel, OutputSingleProductModel
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, status
@@ -19,7 +19,7 @@ from endpoints.v1.products.mappers import (
 )
 
 products_router = APIRouter(
-    prefix="/products", tags=["Products"])
+    prefix="/products", tags=["Product"])
 
 
 @products_router.get(
