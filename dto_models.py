@@ -1,5 +1,6 @@
 
 from datetime import datetime
+from pickletools import floatnl
 from typing import List, Optional
 
 from pydantic import (
@@ -9,6 +10,7 @@ from pydantic import (
     constr,
     root_validator
 )
+
 
 class OutputMachineModel(BaseModel):
     id: int
@@ -94,3 +96,12 @@ class OutputMachineColumnModel(BaseModel):
 class OutputMachineListModel(OutputMachineModel):
     owner: BaseUserModel
     columns: List[OutputMachineColumnModel] = []
+
+
+class BaseMachineColumn(BaseModel):
+    product_id: int
+    price: float
+
+
+class MachinePlanogramChangeModel(BaseModel):
+    columns: List[BaseMachineColumn]
