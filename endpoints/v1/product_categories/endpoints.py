@@ -5,11 +5,7 @@ from dto_models import (
     InputProductCategoryModel,
     OutputSingleProductCategoryModel
 )
-from fastapi import APIRouter, Body, Depends, HTTPException, status
-from mappers import (
-    map_to_output_list_product_category_model,
-    map_to_output_single_product_category_model
-)
+from fastapi import APIRouter, Body, Depends, HTTPException, Path, status
 from pagination import (
     PaginatedMetaModel,
     PaginatedResponseModel,
@@ -17,6 +13,13 @@ from pagination import (
     PaginationInputModel
 )
 from sqlalchemy.exc import IntegrityError
+from datetime import datetime
+
+
+from endpoints.v1.product_categories.mappers import (
+    map_to_output_product_category_list_model,
+    map_to_output_single_product_category_model
+)
 
 product_categories_router = APIRouter(
     prefix="/product-categories", tags=["Product Category"])
@@ -27,7 +30,7 @@ product_categories_router = APIRouter(
     response_model=PaginatedResponseModel,
     summary="Get paginated product categories"
 )
-async def get_product_categories(
+def get_product_categories(
     pagination: PaginationInputModel = Depends(),
     decoded_token: dict = Depends(verify_authorization_token)
 ):
@@ -43,7 +46,7 @@ async def get_product_categories(
         product_categories_query, pagination.page_size)
 
     output_product_categories = [
-        map_to_output_list_product_category_model(p)
+        map_to_output_product_category_list_model(p)
         for p in product_categories
     ]
 
@@ -57,13 +60,104 @@ async def get_product_categories(
         meta=output_meta, content=output_product_categories)
 
 
+@product_categories_router.get(
+    "/{item_id}",
+    response_model=OutputSingleProductCategoryModel,
+    summary="Get single product category"
+)
+def get_single_product_category(
+    decoded_token: dict = Depends(verify_authorization_token),
+    item_id: int = Path(title="Product category ID")
+):
+    product_category = session.query(
+        ProductCategory
+    ).filter(
+        ProductCategory.id == item_id
+    ).one_or_none()
+
+    if not product_category:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=(
+                f"Product category with ID {item_id} not found!"
+            )
+        )
+
+    return map_to_output_single_product_category_model(product_category)
+
+
+@product_categories_router.delete(
+    "/{item_id}",
+    response_model=dict,
+    summary="Delete single product category"
+)
+def delete_single_product_category(
+    decoded_token: dict = Depends(verify_authorization_token),
+    item_id: int = Path(title="Product category ID")
+):
+    product_category = session.query(
+        ProductCategory
+    ).filter(
+        ProductCategory.id == item_id
+    ).one_or_none()
+
+    if not product_category:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=(
+                f"Product category with ID {item_id} not found!"
+            )
+        )
+
+    session.delete(product_category)
+    session.commit()
+
+    return {
+        "message": f"Product category with ID {item_id} successfully deleted!"
+    }
+
+
+@product_categories_router.patch(
+    "/{item_id}",
+    response_model=OutputSingleProductCategoryModel,
+    summary="Update single product category"
+)
+def update_single_product_category(
+    decoded_token: dict = Depends(verify_authorization_token),
+    item_id: int = Path(title="Product category ID"),
+    product_category_model: InputProductCategoryModel = Body()
+):
+    product_category = session.query(
+        ProductCategory
+    ).filter(
+        ProductCategory.id == item_id
+    ).one_or_none()
+
+    if not product_category:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=(
+                f"Product category with ID {item_id} not found!"
+            )
+        )
+
+    product_category.title = product_category_model.title
+    product_category.updated_at = datetime.now()
+    product_category.updated_by = decoded_token["id"]
+
+    session.add(product_category)
+    session.commit()
+
+    return map_to_output_single_product_category_model(product_category)
+
+
 @product_categories_router.post(
     "",
     response_model=OutputSingleProductCategoryModel,
     status_code=status.HTTP_201_CREATED,
     summary="Create product category"
 )
-async def create_product_category(
+def create_product_category(
     decoded_token: dict = Depends(verify_authorization_token),
     product_category_model: InputProductCategoryModel = Body()
 ):

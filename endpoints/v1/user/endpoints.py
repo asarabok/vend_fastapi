@@ -18,7 +18,7 @@ user_router = APIRouter(prefix="/user", tags=["User"])
     response_model=AuthenticatedUserResponseModel,
     summary="User login which generates JWT token"
 )
-async def user_login(user: LoginUserModel):
+def user_login(user: LoginUserModel):
     login_user = session.query(
         User
     ).filter(
@@ -40,7 +40,7 @@ async def user_login(user: LoginUserModel):
     response_model=BaseUserModel,
     summary="Get logged user data"
 )
-async def get_user_data(
+def get_user_data(
     decoded_token: dict = Depends(verify_authorization_token)
 ):
     return BaseUserModel(**decoded_token)
