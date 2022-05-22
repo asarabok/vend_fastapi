@@ -1,4 +1,4 @@
-from dto_models import BaseUserModel, OutputProductModel
+from dto_models import BaseUserModel, OutputProductCategoryModel
 
 
 def map_to_base_user_model(user):
@@ -11,9 +11,7 @@ def map_to_base_user_model(user):
 
 
 def map_to_output_product_category_model(product_category):
-    return OutputProductModel(
+    return OutputProductCategoryModel(
         id=product_category.id,
-        title=product_category.title,
-        created_at=product_category.created_at,
-        updated_at=product_category.updated_at
+        title=product_category.title
     )

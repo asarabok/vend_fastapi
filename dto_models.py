@@ -1,4 +1,5 @@
 import os
+
 from typing import Any, List, Optional
 
 from pydantic import BaseModel, EmailStr, conint, constr
@@ -47,9 +48,9 @@ class BaseProductCategoryModel(BaseModel):
     created_by: Optional[int]
 
 
-class OutputProductModel(BaseProductCategoryModel):
+class OutputProductCategoryModel(BaseModel):
     id: int
-    updated_at: Optional[int] = None
+    title: constr(max_length=50)
 
 
 """

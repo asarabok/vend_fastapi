@@ -1,4 +1,5 @@
 from authentication import JwtAuthentication
+from db_models import User
 from dependencies import verify_authorization_token
 from dto_models import (
     AuthenticatedUserResponseModel,
@@ -6,7 +7,8 @@ from dto_models import (
     LoginUserModel
 )
 from fastapi import APIRouter, Depends, HTTPException, status
-from utils import get_login_user
+from utils import hash_password
+from database import session
 
 user_router = APIRouter(prefix="/user", tags=["User"])
 
@@ -17,7 +19,11 @@ user_router = APIRouter(prefix="/user", tags=["User"])
     summary="User login which generates JWT token"
 )
 async def user_login(user: LoginUserModel):
-    login_user = get_login_user(user)
+    login_user = session.query(
+        User
+    ).filter(
+        User.email == user.email, User.password == hash_password(user.password)
+    ).one_or_none()
 
     if not login_user:
         raise HTTPException(
