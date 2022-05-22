@@ -2,15 +2,20 @@ from database import session
 from db_models import ProductCategory
 from dependencies import verify_authorization_token
 from dto_models import (
-    BaseProductCategoryModel,
-    OutputProductCategoryModel,
-    PaginatedMetaModel,
-    PaginatedResponseModel,
-    PaginationInputModel
+    InputProductCategoryModel,
+    OutputSingleProductCategoryModel
 )
 from fastapi import APIRouter, Body, Depends, HTTPException, status
-from mappers import map_to_output_product_category_model
-from pagination import Pagination
+from mappers import (
+    map_to_output_list_product_category_model,
+    map_to_output_single_product_category_model
+)
+from pagination import (
+    PaginatedMetaModel,
+    PaginatedResponseModel,
+    Pagination,
+    PaginationInputModel
+)
 from sqlalchemy.exc import IntegrityError
 
 product_categories_router = APIRouter(
@@ -38,7 +43,7 @@ async def get_product_categories(
         product_categories_query, pagination.page_size)
 
     output_product_categories = [
-        map_to_output_product_category_model(p)
+        map_to_output_list_product_category_model(p)
         for p in product_categories
     ]
 
@@ -54,13 +59,13 @@ async def get_product_categories(
 
 @product_categories_router.post(
     "",
-    response_model=OutputProductCategoryModel,
+    response_model=OutputSingleProductCategoryModel,
     status_code=status.HTTP_201_CREATED,
     summary="Create product category"
 )
 async def create_product_category(
     decoded_token: dict = Depends(verify_authorization_token),
-    product_category_model: BaseProductCategoryModel = Body()
+    product_category_model: InputProductCategoryModel = Body()
 ):
     product_category_model.created_by = decoded_token["id"]
     product_category = ProductCategory(**product_category_model.dict())
@@ -79,4 +84,4 @@ async def create_product_category(
             )
         )
 
-    return map_to_output_product_category_model(product_category)
+    return map_to_output_single_product_category_model(product_category)
