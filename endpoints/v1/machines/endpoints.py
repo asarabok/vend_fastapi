@@ -1,12 +1,9 @@
-from datetime import datetime
+from typing import List
 
 from database import session
-from db_models import Machine, MachineColumn, Product, ProductCategory
+from db_models import Machine, MachineColumn, Product
 from dependencies import verify_authorization_token
-from dto_models import (
-    InputProductCategoryModel,
-    OutputSingleProductCategoryModel
-)
+from dto_models import MachinePlanogramChangeModel, OutputMachineColumnModel
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, status
 from pagination import (
     PaginatedMetaModel,
@@ -14,7 +11,6 @@ from pagination import (
     Pagination,
     PaginationInputModel
 )
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import joinedload
 
 from endpoints.v1.machines.mappers import map_to_output_single_machine_model
@@ -66,3 +62,39 @@ def get_machines(
     )
     return PaginatedResponseModel(
         meta=output_meta, content=output_machines)
+
+
+@machines_router.post(
+    "/{item_id}/push-planogram",
+    response_model=List[OutputMachineColumnModel],
+    summary="Push machine planogram. Only owner of machine can make this change"
+)
+def push_planogram_to_machine(
+    decoded_token: dict = Depends(verify_authorization_token),
+    item_id: int = Path(title="Machine ID"),
+    planogram_model: MachinePlanogramChangeModel = Body()
+):
+    machine_owner_id = session.query(
+        Machine.owner_id).filter(Machine.id == item_id).limit(1).scalar()
+
+    if not machine_owner_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Machine with ID {item_id} does not exists!")
+
+    if not machine_owner_id == decoded_token["id"]:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Only machine owner can push planogram!"
+        )
+
+    machine_columns = session.query(
+        MachineColumn
+    ).filter(
+        MachineColumn.machine_id == item_id
+    ).all()
+
+    for mc in machine_columns:
+        session.delete(mc)
+
+    session.commit()
