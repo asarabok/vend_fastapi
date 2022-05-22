@@ -12,7 +12,8 @@ def map_to_output_single_product_model(product):
         created_at=product.created_at,
         product_category=map_to_output_single_product_category_model(
             product.product_category
-        )
+        ) if product.product_category else None,
+        created_by=product.created_by
     )
 
 
@@ -23,5 +24,5 @@ def map_to_output_product_list_model(product):
         created_at=product.created_at,
         product_category=map_to_output_single_product_category_model(
             product.product_category
-        )
+        ) if product.product_category else None
     )

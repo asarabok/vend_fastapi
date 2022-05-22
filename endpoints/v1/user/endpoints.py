@@ -1,12 +1,14 @@
 from authentication import JwtAuthentication
-from db_models import User
+from db_models import Machine, User
 from dependencies import verify_authorization_token
 from dto_models import (
     AuthenticatedUserResponseModel,
     BaseUserModel,
-    LoginUserModel
+    LoginUserModel,
+    UserInfoModel
 )
 from fastapi import APIRouter, Depends, HTTPException, status
+from endpoints.v1.user.mappers import map_to_output_machine_model
 from utils import hash_password
 from database import session
 
@@ -37,10 +39,24 @@ def user_login(user: LoginUserModel):
 
 @user_router.get(
     "/me",
-    response_model=BaseUserModel,
-    summary="Get logged user data"
+    response_model=UserInfoModel,
+    summary="Get logged user info and assigned machines"
 )
 def get_user_data(
     decoded_token: dict = Depends(verify_authorization_token)
 ):
-    return BaseUserModel(**decoded_token)
+    user_assigned_machines = session.query(
+        Machine
+    ).filter(
+        Machine.owner_id == decoded_token["id"]
+    ).all()
+
+    output_user_machines = [
+        map_to_output_machine_model(m)
+        for m in user_assigned_machines
+    ]
+
+    return UserInfoModel(
+        user=BaseUserModel(**decoded_token),
+        assigned_machines=output_user_machines
+    )

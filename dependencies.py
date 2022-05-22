@@ -13,13 +13,13 @@ def verify_authorization_token(authorization: str = Header()):
     except ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token expired"
+            detail="Token expired!"
         )
 
     except DecodeError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Wrong token"
+            detail="Wrong token!"
         )
 
     return decoded

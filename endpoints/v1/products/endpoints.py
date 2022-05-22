@@ -1,20 +1,22 @@
 
 from database import session
-from db_models import Product
+from db_models import Product, ProductCategory
 from dependencies import verify_authorization_token
-
-from fastapi import APIRouter, Body, Depends, HTTPException, status
 from dto_models import InputProductModel, OutputSingleProductModel
-from endpoints.v1.products.mappers import map_to_output_product_list_model, map_to_output_single_product_model
+from fastapi import APIRouter, Body, Depends, HTTPException, Path, status
 from pagination import (
     PaginatedMetaModel,
     PaginatedResponseModel,
     Pagination,
     PaginationInputModel
 )
-
-from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import joinedload
+
+from endpoints.v1.products.mappers import (
+    map_to_output_product_list_model,
+    map_to_output_single_product_model
+)
 
 products_router = APIRouter(
     prefix="/products", tags=["Products"])
@@ -67,9 +69,9 @@ def create_product(
     decoded_token: dict = Depends(verify_authorization_token),
     product_model: InputProductModel = Body()
 ):
-    product_model.created_by = decoded_token["id"]
-    product = Product(**product_model.dict())
+    product = Product(**product_model.dict(), created_by=decoded_token["id"])
 
+    session.rollback()
     session.add(product)
 
     try:
@@ -81,6 +83,32 @@ def create_product(
             detail=(
                 f"Product with title {product.title} "
                 "already exists!"
+            )
+        )
+
+    return map_to_output_single_product_model(product)
+
+
+@products_router.get(
+    "/{item_id}",
+    response_model=OutputSingleProductModel,
+    summary="Get single product"
+)
+def get_single_product(
+    decoded_token: dict = Depends(verify_authorization_token),
+    item_id: int = Path(title="Product ID")
+):
+    product = session.query(
+        Product
+    ).filter(
+        Product.id == item_id
+    ).one_or_none()
+
+    if not product:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=(
+                f"Product with ID {item_id} not found!"
             )
         )
 

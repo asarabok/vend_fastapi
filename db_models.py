@@ -51,6 +51,8 @@ class Machine(Base):
     manufacturer = Column(String(50), nullable=False)
     name = Column(String(50), nullable=False)
     model = Column(String(50), nullable=True)
+    owner_id = Column(
+        Integer, ForeignKey("user.id"), nullable=False)
 
     columns = relationship("MachineColumn", back_populates="machine")
 
