@@ -1,0 +1,40 @@
+from authentication import JwtAuthentication
+from dependencies import verify_authorization_token
+from dto_models import (
+    AuthenticatedUserResponseModel,
+    BaseUserModel,
+    LoginUserModel
+)
+from fastapi import APIRouter, Depends, HTTPException, status
+from utils import get_login_user
+
+user_router = APIRouter(prefix="/user", tags=["User"])
+
+
+@user_router.post(
+    "/login",
+    response_model=AuthenticatedUserResponseModel,
+    summary="User login which generates JWT token"
+)
+async def user_login(user: LoginUserModel):
+    login_user = get_login_user(user)
+
+    if not login_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Wrong user data!"
+        )
+
+    token = JwtAuthentication.generate_jwt_token(login_user)
+    return AuthenticatedUserResponseModel(token=token)
+
+
+@user_router.get(
+    "/me",
+    response_model=BaseUserModel,
+    summary="Get logged user data"
+)
+async def get_user_data(
+    decoded_token: dict = Depends(verify_authorization_token)
+):
+    return BaseUserModel(**decoded_token)

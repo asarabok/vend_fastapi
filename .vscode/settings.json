@@ -1,0 +1,50 @@
+{
+    "editor.fontSize": 15,
+    "workbench.tree.indent": 20,
+    "files.insertFinalNewline": true,
+    "editor.lineHeight": 25,
+    "terminal.integrated.lineHeight": 2,
+    "terminal.integrated.fontSize": 13,
+
+    "python.formatting.autopep8Args": [
+        "W0614"
+    ],
+    "python.linting.pylintEnabled": true,
+    "python.linting.pycodestyleEnabled": true,
+    "python.linting.pylintArgs": [
+        "--enable=W0614"
+    ],
+    "python.formatting.provider": "black",
+    "python.linting.prospectorArgs": [
+        "-s",
+        "veryhigh"
+    ],
+    "eslint.alwaysShowStatus": true,
+    "python.linting.ignorePatterns": [
+        ".vscode/*.py",
+        "**/site-packages/**/*.py",
+        "*.pyc"
+    ],
+    "editor.rulers": [
+        80,
+        90
+    ],
+    "git.autofetch": true,
+    "files.exclude": {
+        "*.pyc": true,
+        "**/__pycache__/": true,
+        "**/*.pyc": true
+    },
+    "debug.allowBreakpointsEverywhere": true,
+    "files.trimTrailingWhitespace": true,
+    "files.trimFinalNewlines": true,
+    "window.zoomLevel": 1,
+    "python.testing.pytestEnabled": true,
+    "python.formatting.blackArgs": [
+        "--line-length=79"
+    ],
+    "python.sortImports.args": [
+        "--multi-line", "3",
+        "--line-width", "80"
+    ]
+}
