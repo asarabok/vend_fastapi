@@ -1,8 +1,11 @@
+from datetime import datetime
+
 from database import session
 from db_models import ProductCategory
 from dependencies import verify_authorization_token
 from dto_models import (
-    InputProductCategoryModel,
+    InputCreateProductCategoryModel,
+    InputUpdateProductCategoryModel,
     OutputSingleProductCategoryModel
 )
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, status
@@ -13,8 +16,6 @@ from pagination import (
     PaginationInputModel
 )
 from sqlalchemy.exc import IntegrityError
-from datetime import datetime
-
 
 from endpoints.v1.product_categories.mappers import (
     map_to_output_product_category_list_model,
@@ -125,7 +126,7 @@ def delete_single_product_category(
 def update_single_product_category(
     decoded_token: dict = Depends(verify_authorization_token),
     item_id: int = Path(title="Product category ID"),
-    product_category_model: InputProductCategoryModel = Body()
+    product_category_model: InputUpdateProductCategoryModel = Body()
 ):
     product_category = session.query(
         ProductCategory
@@ -159,7 +160,7 @@ def update_single_product_category(
 )
 def create_product_category(
     decoded_token: dict = Depends(verify_authorization_token),
-    product_category_model: InputProductCategoryModel = Body()
+    product_category_model: InputCreateProductCategoryModel = Body()
 ):
     product_category_model.created_by = decoded_token["id"]
     product_category = ProductCategory(**product_category_model.dict())

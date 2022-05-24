@@ -50,7 +50,11 @@ class AuthenticatedUserResponseModel(BaseModel):
     token: str
 
 
-class InputProductCategoryModel(BaseModel):
+class InputCreateProductCategoryModel(BaseModel):
+    title: constr(max_length=50)
+
+
+class InputUpdateProductCategoryModel(InputCreateProductCategoryModel):
     title: constr(max_length=50)
     created_by: Optional[int]
 
