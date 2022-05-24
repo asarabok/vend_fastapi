@@ -55,7 +55,6 @@ class InputCreateProductCategoryModel(BaseModel):
 
 
 class InputUpdateProductCategoryModel(InputCreateProductCategoryModel):
-    title: constr(max_length=50)
     created_by: Optional[int]
 
 
