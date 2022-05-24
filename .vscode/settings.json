@@ -9,8 +9,8 @@
     "python.formatting.autopep8Args": [
         "W0614"
     ],
-    "python.linting.pylintEnabled": true,
-    "python.linting.pycodestyleEnabled": true,
+    "python.linting.pylintEnabled": false,
+    "python.linting.pycodestyleEnabled": false,
     "python.linting.pylintArgs": [
         "--enable=W0614"
     ],
@@ -46,5 +46,7 @@
     "python.sortImports.args": [
         "--multi-line", "3",
         "--line-width", "80"
-    ]
+    ],
+    "python.linting.flake8Enabled": true,
+    "python.linting.enabled": true
 }

@@ -9,3 +9,4 @@ python-dotenv==0.20.0
 cleo==0.8.1
 email-validator==1.2.1
 pyjwt==2.4.0
+typer==0.4.1
