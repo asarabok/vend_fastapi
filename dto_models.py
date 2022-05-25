@@ -1,14 +1,14 @@
 
 from datetime import datetime
-from pickletools import floatnl
 from typing import List, Optional
 
 from pydantic import (
     BaseModel,
     EmailStr,
     conint,
+    conlist,
     constr,
-    root_validator
+    validator
 )
 
 
@@ -55,7 +55,7 @@ class InputCreateProductCategoryModel(BaseModel):
 
 
 class InputUpdateProductCategoryModel(InputCreateProductCategoryModel):
-    created_by: Optional[int]
+    pass
 
 
 class OutputListProductCategoryModel(BaseModel):
@@ -101,10 +101,10 @@ class OutputMachineListModel(OutputMachineModel):
     columns: List[OutputMachineColumnModel] = []
 
 
-class BaseMachineColumn(BaseModel):
+class InputAddMachineColumn(BaseModel):
     product_id: int
     price: float
 
 
-class MachinePlanogramChangeModel(BaseModel):
-    columns: List[BaseMachineColumn]
+class InputMachinePlanogramChangeModel(BaseModel):
+    columns: conlist(InputAddMachineColumn, min_items=1, max_items=20)

@@ -1,8 +1,7 @@
 from datetime import datetime
 
-from database import session
 from db_models import ProductCategory
-from dependencies import verify_authorization_token
+from dependencies import get_db, verify_authorization_token
 from dto_models import (
     InputCreateProductCategoryModel,
     InputUpdateProductCategoryModel,
@@ -16,6 +15,7 @@ from pagination import (
     PaginationInputModel
 )
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
 from endpoints.v1.product_categories.mappers import (
     map_to_output_product_category_list_model,
@@ -32,6 +32,7 @@ product_categories_router = APIRouter(
     summary="Get paginated product categories"
 )
 def get_product_categories(
+    session: Session = Depends(get_db),
     pagination: PaginationInputModel = Depends(),
     decoded_token: dict = Depends(verify_authorization_token)
 ):
@@ -67,6 +68,7 @@ def get_product_categories(
     summary="Get single product category"
 )
 def get_single_product_category(
+    session: Session = Depends(get_db),
     decoded_token: dict = Depends(verify_authorization_token),
     item_id: int = Path(title="Product category ID")
 ):
@@ -93,6 +95,7 @@ def get_single_product_category(
     summary="Delete single product category"
 )
 def delete_single_product_category(
+    session: Session = Depends(get_db),
     decoded_token: dict = Depends(verify_authorization_token),
     item_id: int = Path(title="Product category ID")
 ):
@@ -124,6 +127,7 @@ def delete_single_product_category(
     summary="Update single product category"
 )
 def update_single_product_category(
+    session: Session = Depends(get_db),
     decoded_token: dict = Depends(verify_authorization_token),
     item_id: int = Path(title="Product category ID"),
     product_category_model: InputUpdateProductCategoryModel = Body()
@@ -159,6 +163,7 @@ def update_single_product_category(
     summary="Create product category"
 )
 def create_product_category(
+    session: Session = Depends(get_db),
     decoded_token: dict = Depends(verify_authorization_token),
     product_category_model: InputCreateProductCategoryModel = Body()
 ):

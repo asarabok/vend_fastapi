@@ -1,8 +1,10 @@
+from typing import Generator
+
 from fastapi import Header, HTTPException, status
 from jwt.exceptions import DecodeError, ExpiredSignatureError
 
 from authentication import JwtAuthentication
-
+from database import session
 
 def verify_authorization_token(authorization: str = Header(default=None)):
     if not authorization:
@@ -28,3 +30,11 @@ def verify_authorization_token(authorization: str = Header(default=None)):
         )
 
     return decoded
+
+
+def get_db() -> Generator:
+    try:
+        db = session()
+        yield db
+    finally:
+        db.close()

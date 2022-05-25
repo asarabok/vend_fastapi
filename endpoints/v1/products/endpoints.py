@@ -1,7 +1,5 @@
-
-from database import session
 from db_models import Product
-from dependencies import verify_authorization_token
+from dependencies import get_db, verify_authorization_token
 from dto_models import InputProductModel, OutputSingleProductModel
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, status
 from pagination import (
@@ -11,7 +9,7 @@ from pagination import (
     PaginationInputModel
 )
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import Session, joinedload
 
 from endpoints.v1.products.mappers import (
     map_to_output_product_list_model,
@@ -28,6 +26,7 @@ products_router = APIRouter(
     summary="Get paginated products"
 )
 def get_products(
+    session: Session = Depends(get_db),
     pagination: PaginationInputModel = Depends(),
     decoded_token: dict = Depends(verify_authorization_token)
 ):
@@ -66,6 +65,7 @@ def get_products(
     summary="Create product"
 )
 def create_product(
+    session: Session = Depends(get_db),
     decoded_token: dict = Depends(verify_authorization_token),
     product_model: InputProductModel = Body()
 ):
@@ -95,6 +95,7 @@ def create_product(
     summary="Get single product"
 )
 def get_single_product(
+    session: Session = Depends(get_db),
     decoded_token: dict = Depends(verify_authorization_token),
     item_id: int = Path(title="Product ID")
 ):

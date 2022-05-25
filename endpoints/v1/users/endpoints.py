@@ -1,16 +1,17 @@
 from authentication import JwtAuthentication
 from db_models import Machine, User
-from dependencies import verify_authorization_token
+from dependencies import get_db, verify_authorization_token
 from dto_models import (
     AuthenticatedUserResponseModel,
     BaseUserModel,
     LoginUserModel,
     UserInfoModel
 )
-from fastapi import APIRouter, Depends, HTTPException, status
-from endpoints.v1.users.mappers import map_to_output_machine_model
+from fastapi import APIRouter, Body, Depends, HTTPException, status
+from sqlalchemy.orm import Session
 from utils import hash_password
-from database import session
+
+from endpoints.v1.users.mappers import map_to_output_machine_model
 
 user_routers = APIRouter(prefix="/users", tags=["User"])
 
@@ -20,7 +21,10 @@ user_routers = APIRouter(prefix="/users", tags=["User"])
     response_model=AuthenticatedUserResponseModel,
     summary="User login which generates JWT token"
 )
-def user_login(user: LoginUserModel):
+def user_login(
+    session: Session = Depends(get_db),
+    user: LoginUserModel = Body()
+):
     login_user = session.query(
         User
     ).filter(
@@ -43,6 +47,7 @@ def user_login(user: LoginUserModel):
     summary="Get logged user info and assigned machines"
 )
 def get_user_data(
+    session: Session = Depends(get_db),
     decoded_token: dict = Depends(verify_authorization_token)
 ):
     user_assigned_machines = session.query(

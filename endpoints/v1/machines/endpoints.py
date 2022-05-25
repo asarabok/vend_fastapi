@@ -1,9 +1,8 @@
 from typing import List
 
-from database import session
 from db_models import Machine, MachineColumn, Product
-from dependencies import verify_authorization_token
-from dto_models import MachinePlanogramChangeModel, OutputMachineColumnModel
+from dependencies import get_db, verify_authorization_token
+from dto_models import InputMachinePlanogramChangeModel, OutputMachineColumnModel
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, status
 from pagination import (
     PaginatedMetaModel,
@@ -11,7 +10,7 @@ from pagination import (
     Pagination,
     PaginationInputModel
 )
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import Session, joinedload
 
 from endpoints.v1.machines.mappers import map_to_output_single_machine_model
 
@@ -25,6 +24,7 @@ machines_router = APIRouter(
     summary="Get paginated machines"
 )
 def get_machines(
+    session: Session = Depends(get_db),
     pagination: PaginationInputModel = Depends(),
     decoded_token: dict = Depends(verify_authorization_token)
 ):
@@ -70,9 +70,10 @@ def get_machines(
     summary="Push machine planogram. Only owner of machine can make this change"
 )
 def push_planogram_to_machine(
+    session: Session = Depends(get_db),
     decoded_token: dict = Depends(verify_authorization_token),
     item_id: int = Path(title="Machine ID"),
-    planogram_model: MachinePlanogramChangeModel = Body()
+    planogram_model: InputMachinePlanogramChangeModel = Body()
 ):
     machine_owner_id = session.query(
         Machine.owner_id).filter(Machine.id == item_id).limit(1).scalar()
@@ -94,7 +95,35 @@ def push_planogram_to_machine(
         MachineColumn.machine_id == item_id
     ).all()
 
+    for mc in planogram_model.columns:
+        product = session.query(
+            Product
+        ).filter(
+            Product.id == mc.product_id
+        ).first()
+
+        if not product:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Product with ID {mc.product_id} doesn't exists!"
+            )
+
     for mc in machine_columns:
         session.delete(mc)
+
+    session.commit()
+
+    i = 0
+    for mc in planogram_model.columns:
+        machine_column = MachineColumn(
+            index=i,
+            current_quantity=20,
+            spiral_quantity=20,
+            price=mc.price,
+            product_id=mc.product_id,
+            machine_id=item_id
+        )
+        i += 1
+        session.add(machine_column)
 
     session.commit()
