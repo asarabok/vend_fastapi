@@ -1,8 +1,8 @@
-from typing import List
-
 from db_models import Machine, MachineColumn, Product
 from dependencies import get_db, verify_authorization_token
-from dto_models import InputMachinePlanogramChangeModel, OutputMachineColumnModel
+from dto_models import (
+    InputMachinePlanogramChangeModel
+)
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, status
 from pagination import (
     PaginatedMetaModel,
@@ -12,7 +12,9 @@ from pagination import (
 )
 from sqlalchemy.orm import Session, joinedload
 
-from endpoints.v1.machines.mappers import map_to_output_single_machine_model
+from endpoints.v1.machines.mappers import (
+    map_to_output_single_machine_model
+)
 
 machines_router = APIRouter(
     prefix="/machines", tags=["Machine"])
@@ -66,7 +68,6 @@ def get_machines(
 
 @machines_router.post(
     "/{item_id}/push-planogram",
-    response_model=List[OutputMachineColumnModel],
     summary="Push machine planogram. Only owner of machine can make this change"
 )
 def push_planogram_to_machine(
@@ -127,3 +128,7 @@ def push_planogram_to_machine(
         session.add(machine_column)
 
     session.commit()
+
+    return {
+        "message": "Planogram successfully updated!"
+    }
