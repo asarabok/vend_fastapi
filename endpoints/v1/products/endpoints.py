@@ -82,7 +82,7 @@ def create_product(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=(
                 f"Product with title {product.title} "
-                "already exists!"
+                f"and category ID {product.product_category_id} cannot be added!"
             )
         )
 

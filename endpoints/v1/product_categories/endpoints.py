@@ -162,8 +162,10 @@ def create_product_category(
     decoded_token: dict = Depends(verify_authorization_token),
     product_category_model: InputCreateProductCategoryModel = Body()
 ):
-    product_category_model.created_by = decoded_token["id"]
-    product_category = ProductCategory(**product_category_model.dict())
+    product_category = ProductCategory(
+        **product_category_model.dict(),
+        created_by=decoded_token["id"]
+    )
 
     session.add(product_category)
 
