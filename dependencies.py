@@ -4,7 +4,12 @@ from jwt.exceptions import DecodeError, ExpiredSignatureError
 from authentication import JwtAuthentication
 
 
-def verify_authorization_token(authorization: str = Header()):
+def verify_authorization_token(authorization: str = Header(default=None)):
+    if not authorization:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Please provide authorization token in header!"
+        )
     token = JwtAuthentication.get_token_from_header(authorization)
 
     try:
