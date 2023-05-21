@@ -6,7 +6,8 @@ from jwt.exceptions import DecodeError, ExpiredSignatureError
 from authentication import JwtAuthentication
 from database import session
 
-def verify_authorization_token(authorization: str = Header(default=None)):
+
+def verify_authorization_token(authorization: str = Header(default=None)) -> dict:
     if not authorization:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
